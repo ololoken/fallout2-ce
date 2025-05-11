@@ -60,7 +60,9 @@ static const int gMainMenuButtonKeyBindings[MAIN_MENU_BUTTON_COUNT] = {
     KEY_LOWERCASE_L, // load game
     KEY_LOWERCASE_O, // options
     KEY_LOWERCASE_C, // credits
+#ifndef __EMSCRIPTEN__
     KEY_LOWERCASE_E, // exit
+#endif
 };
 
 // 0x519528
@@ -154,17 +156,17 @@ int mainMenuWindowInit()
     char version[VERSION_MAX];
     versionGetVersion(version, sizeof(version));
     len = fontGetStringWidth(version);
-    windowDrawText(gMainMenuWindow, version, 0, 615 - len, 440, fontSettings | 0x06000000);
+    //windowDrawText(gMainMenuWindow, version, 0, 615 - len, 440, fontSettings | 0x06000000);
 
     char commitHash[VERSION_MAX] = "BUILD HASH: ";
     strcat(commitHash, _BUILD_HASH);
     len = fontGetStringWidth(commitHash);
-    windowDrawText(gMainMenuWindow, commitHash, 0, 615 - len, 450, fontSettings | 0x06000000);
+    //windowDrawText(gMainMenuWindow, commitHash, 0, 615 - len, 450, fontSettings | 0x06000000);
 
     char buildDate[VERSION_MAX] = "DATE: ";
     strcat(buildDate, _BUILD_DATE);
     len = fontGetStringWidth(buildDate);
-    windowDrawText(gMainMenuWindow, buildDate, 0, 615 - len, 460, fontSettings | 0x06000000);
+    //windowDrawText(gMainMenuWindow, buildDate, 0, 615 - len, 460, fontSettings | 0x06000000);
 
     // menuup.frm
     fid = buildFid(OBJ_TYPE_INTERFACE, 299, 0, 0, 0);
@@ -364,13 +366,14 @@ int mainMenuWindowHandleEvents()
                 continue;
             }
         }
-
         if (keyCode == KEY_ESCAPE || _game_user_wants_to_quit == 3) {
+#ifndef __EMSCRIPTEN__
             rc = MAIN_MENU_EXIT;
 
             // NOTE: Uninline.
             main_menu_play_sound("nmselec1");
             break;
+#endif
         } else if (_game_user_wants_to_quit == 2) {
             _game_user_wants_to_quit = 0;
         } else {

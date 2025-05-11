@@ -207,6 +207,9 @@ int falloutMain(int argc, char** argv)
                 creditsOpen("quotes.txt", -1, true);
                 break;
             case MAIN_MENU_EXIT:
+#ifdef __EMSCRIPTEN__
+                break;
+#endif
             case -1:
                 done = true;
                 mainMenuWindowHide(true);

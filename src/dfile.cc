@@ -11,10 +11,14 @@
 
 #include "platform_compat.h"
 
-namespace fallout {
+#include <iostream>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
+namespace fallout {
 // The size of decompression buffer for reading compressed [DFile]s.
-#define DFILE_DECOMPRESSION_BUFFER_SIZE (0x400)
+#define DFILE_DECOMPRESSION_BUFFER_SIZE (0x400 << 5)
 
 // Specifies that [DFile] has unget character.
 //
@@ -43,6 +47,21 @@ static int dfileReadCharInternal(DFile* stream);
 static bool dfileReadCompressed(DFile* stream, void* ptr, size_t size);
 static void dfileUngetCompressed(DFile* stream, int ch);
 
+#ifdef __EMSCRIPTEN__
+EM_ASYNC_JS(void, em_checkCache, (char* dbFilePathPtr, const char* filePathPtr), {
+    const db = UTF8ToString(dbFilePathPtr);
+    const path = UTF8ToString(filePathPtr);
+    await (Module[`./${db}`]?.checkCache(path) ?? Module[db]?.checkCache(path) ?? Promise.resolve());
+})
+EM_JS(void, em_report, (char* dbPtr, char* pathPtr), {
+    const db = UTF8ToString(dbPtr);
+    const path = UTF8ToString(pathPtr);
+    Module['_loaded'] ??= {};
+    Module['_loaded'][db] ??= {[path]: 0};
+    Module['_loaded'][db][path] += 1;
+});
+#endif
+
 // Reads .DAT file contents.
 //
 // 0x4E4F58
@@ -65,8 +84,7 @@ DBase* dbaseOpen(const char* filePath)
 
     // Get file size, and reposition stream to read footer, which contains two
     // 32-bits ints.
-    int fileSize = getFileSize(stream);
-    if (fseek(stream, fileSize - sizeof(int) * 2, SEEK_SET) != 0) {
+    if (fseek(stream, - sizeof(int) * 2, SEEK_END) != 0) {
         goto err;
     }
 
@@ -86,7 +104,7 @@ DBase* dbaseOpen(const char* filePath)
     }
 
     // Reposition stream to the beginning of the entries table.
-    if (fseek(stream, fileSize - entriesDataSize - sizeof(int) * 2, SEEK_SET) != 0) {
+    if (fseek(stream, - entriesDataSize - sizeof(int) * 2, SEEK_END) != 0) {
         goto err;
     }
 
@@ -146,8 +164,9 @@ DBase* dbaseOpen(const char* filePath)
     }
 
     dbase->path = compat_strdup(filePath);
-    dbase->dataOffset = fileSize - dbaseDataSize;
+    dbase->dataOffset = getFileSize(stream) - dbaseDataSize;
 
+    std::cout << "DB:open" << dbase->path << "; entries: " << dbase->entriesLength << std::endl;
     fclose(stream);
 
     return dbase;
@@ -309,6 +328,9 @@ DFile* dfileOpen(DBase* dbase, const char* filePath, const char* mode)
     assert(filePath); // dfile.c, 296
     assert(mode); // dfile.c, 297
 
+#ifdef __EMSCRIPTEN__
+    em_checkCache(dbase->path, filePath);
+#endif
     return dfileOpenInternal(dbase, filePath, mode, nullptr);
 }
 
@@ -723,6 +745,8 @@ static DFile* dfileOpenInternal(DBase* dbase, const char* filePath, const char* 
     if (mode[1] == 't') {
         dfile->flags |= DFILE_TEXT;
     }
+
+    em_report(dfile->dbase->path, dfile->entry->path);
 
     return dfile;
 

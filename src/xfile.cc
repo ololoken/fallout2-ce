@@ -140,9 +140,7 @@ XFile* xfileOpen(const char* filePath, const char* mode)
     if (stream->type == XFILE_TYPE_FILE) {
         // Opened file is a plain stream, which might be gzipped. In this case
         // first two bytes will contain magic numbers.
-        int ch1 = fgetc(stream->file);
-        int ch2 = fgetc(stream->file);
-        if (ch1 == 0x1F && ch2 == 0x8B) {
+        if (0x1F == fgetc(stream->file) && 0x8B == fgetc(stream->file)) {
             // File is gzipped. Close plain stream and reopen this file as
             // gzipped stream.
             fclose(stream->file);

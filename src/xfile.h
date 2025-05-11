@@ -6,7 +6,6 @@
 #include <zlib.h>
 
 #include "dfile.h"
-#include "platform_compat.h"
 
 namespace fallout {
 
