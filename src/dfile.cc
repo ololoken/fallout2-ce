@@ -53,13 +53,6 @@ EM_ASYNC_JS(void, em_checkCache, (char* dbFilePathPtr, const char* filePathPtr),
     const path = UTF8ToString(filePathPtr);
     await (Module[`./${db}`]?.checkCache(path) ?? Module[db]?.checkCache(path) ?? Promise.resolve());
 })
-EM_JS(void, em_report, (char* dbPtr, char* pathPtr), {
-    const db = UTF8ToString(dbPtr);
-    const path = UTF8ToString(pathPtr);
-    Module['_loaded'] ??= {};
-    Module['_loaded'][db] ??= {[path]: 0};
-    Module['_loaded'][db][path] += 1;
-});
 #endif
 
 // Reads .DAT file contents.
@@ -745,8 +738,6 @@ static DFile* dfileOpenInternal(DBase* dbase, const char* filePath, const char* 
     if (mode[1] == 't') {
         dfile->flags |= DFILE_TEXT;
     }
-
-    em_report(dfile->dbase->path, dfile->entry->path);
 
     return dfile;
 

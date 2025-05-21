@@ -579,8 +579,8 @@ int gameHandleKey(int eventCode, bool isInCombatMode)
             _gmouse_handle_event(mouseX, mouseY, mouseEvent);
         }
         break;
-    case KEY_CTRL_Q:
-    case KEY_CTRL_X:
+    //case KEY_CTRL_Q:
+    //case KEY_CTRL_X:
     case KEY_F10:
         soundPlayFile("ib1p1xx1");
         showQuitConfirmationDialog();
@@ -869,8 +869,8 @@ int gameHandleKey(int eventCode, bool isInCombatMode)
         }
         break;
     case KEY_F1:
-        soundPlayFile("ib1p1xx1");
-        showHelp();
+        //soundPlayFile("ib1p1xx1");
+        //showHelp();
         break;
     case KEY_F2:
         gameSoundSetMasterVolume(gameSoundGetMasterVolume() - 2047);
@@ -878,14 +878,14 @@ int gameHandleKey(int eventCode, bool isInCombatMode)
     case KEY_F3:
         gameSoundSetMasterVolume(gameSoundGetMasterVolume() + 2047);
         break;
-    case KEY_CTRL_S:
+    //case KEY_CTRL_S:
     case KEY_F4:
         soundPlayFile("ib1p1xx1");
         if (lsgSaveGame(1) == -1) {
             debugPrint("\n ** Error calling SaveGame()! **\n");
         }
         break;
-    case KEY_CTRL_L:
+    //case KEY_CTRL_L:
     case KEY_F5:
         soundPlayFile("ib1p1xx1");
         if (lsgLoadGame(LOAD_SAVE_MODE_NORMAL) == -1) {

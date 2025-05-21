@@ -10,6 +10,9 @@
 #else
 #include <unistd.h>
 #endif
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "file_find.h"
 
@@ -40,6 +43,13 @@ static XBase* gXbaseHead;
 
 // 0x6B24D4
 static bool gXbaseExitHandlerRegistered;
+
+#ifdef __EMSCRIPTEN__
+EM_ASYNC_JS(void, em_checkDiskCache, (const char* filePathPtr), {
+    const path = UTF8ToString(filePathPtr);
+    await (Module?.[`__diskCache`]?.checkCache(path) ?? Promise.resolve());
+})
+#endif
 
 // 0x4DED6C
 int xfileClose(XFile* stream)
@@ -72,7 +82,9 @@ XFile* xfileOpen(const char* filePath, const char* mode)
 {
     assert(filePath); // "filename", "xfile.c", 162
     assert(mode); // "mode", "xfile.c", 163
-
+#ifdef __EMSCRIPTEN__
+    em_checkDiskCache(filePath);
+#endif
     XFile* stream = (XFile*)malloc(sizeof(*stream));
     if (stream == nullptr) {
         return nullptr;
