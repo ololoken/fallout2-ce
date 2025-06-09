@@ -18,7 +18,7 @@
 
 namespace fallout {
 // The size of decompression buffer for reading compressed [DFile]s.
-#define DFILE_DECOMPRESSION_BUFFER_SIZE (0x400 << 5)
+#define DFILE_DECOMPRESSION_BUFFER_SIZE (0x400)
 
 // Specifies that [DFile] has unget character.
 //
@@ -46,14 +46,6 @@ static DFile* dfileOpenInternal(DBase* dbase, const char* filename, const char* 
 static int dfileReadCharInternal(DFile* stream);
 static bool dfileReadCompressed(DFile* stream, void* ptr, size_t size);
 static void dfileUngetCompressed(DFile* stream, int ch);
-
-#ifdef __EMSCRIPTEN__
-EM_ASYNC_JS(void, em_checkCache, (char* dbFilePathPtr, const char* filePathPtr), {
-    const db = UTF8ToString(dbFilePathPtr);
-    const path = UTF8ToString(filePathPtr);
-    await (Module[`./${db}`]?.checkCache(path) ?? Module[db]?.checkCache(path) ?? Promise.resolve());
-})
-#endif
 
 // Reads .DAT file contents.
 //
@@ -159,7 +151,6 @@ DBase* dbaseOpen(const char* filePath)
     dbase->path = compat_strdup(filePath);
     dbase->dataOffset = getFileSize(stream) - dbaseDataSize;
 
-    std::cout << "DB:open" << dbase->path << "; entries: " << dbase->entriesLength << std::endl;
     fclose(stream);
 
     return dbase;
@@ -321,9 +312,6 @@ DFile* dfileOpen(DBase* dbase, const char* filePath, const char* mode)
     assert(filePath); // dfile.c, 296
     assert(mode); // dfile.c, 297
 
-#ifdef __EMSCRIPTEN__
-    em_checkCache(dbase->path, filePath);
-#endif
     return dfileOpenInternal(dbase, filePath, mode, nullptr);
 }
 

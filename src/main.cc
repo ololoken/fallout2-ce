@@ -40,6 +40,9 @@
 #include "window_manager_private.h"
 #include "word_wrap.h"
 #include "worldmap.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace fallout {
 
@@ -92,6 +95,9 @@ int falloutMain(int argc, char** argv)
 
     if (mainMenuWindowInit() == 0) {
         bool done = false;
+#ifdef __EMSCRIPTEN__
+        EM_ASM(Module?.gameReady?.());
+#endif
         while (!done) {
             keyboardReset();
             _gsound_background_play_level_music("07desert", 11);
