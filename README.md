@@ -125,7 +125,7 @@ IFACE_BAR_SIDES_ORI=0
 ;This will increase the width of the interface bar expanding the area used to display text.
 ;if IFACE_BAR_WIDTH=640 - Interface bar will remain at it's original width.
 ;if IFACE_BAR_WIDTH=800 - Interface bar will use 800pix wide asset from f2_res.dat.
-IFACE_BAR_WIDTH=640
+;IFACE_BAR_WIDTH=640
 ```
 
 Recommendations:
@@ -140,6 +140,17 @@ In time this stuff will receive in-game interface, right now you have to do it m
 The third configuration file is `ddraw.ini` (part of Sfall). There are dozens of options that adjust or override engine behaviour and gameplay mechanics. This file is intended for modders and advanced users.
 
 For a sample ddraw.ini configuration file, containing all currently working settings use this link: [ddraw.ini](https://raw.githubusercontent.com/fallout2-ce/fallout2-ce/refs/heads/main/files/ddraw.ini)
+
+## Quality of life benefits over vanilla Fallout
+
+* High resolution support
+* Increased pathfinding nodes 5x for more accurate pathfinding
+* Ctrl-click to quickly move items when bartering, looting, or stealing
+* _a_ to select "all" when selecting item quantity
+* _a_ to `Take All` when looting
+* When bartering, caps default to the right amount to balance the trade (if possible)
+* Music continues playing between maps (requires config)
+* Auto open doors (requires config)
 
 ## Contributing
 
