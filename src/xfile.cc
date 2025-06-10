@@ -45,7 +45,7 @@ static XBase* gXbaseHead;
 static bool gXbaseExitHandlerRegistered;
 
 #ifdef __EMSCRIPTEN__
-EM_ASYNC_JS(void, em_checkDiskCache, (const char* filePathPtr), {
+EM_ASYNC_JS(void, em_check_external_cache, (const char* filePathPtr), {
     const path = UTF8ToString(filePathPtr);
     await (Module?.[`__diskCache`]?.checkCache(path) ?? Promise.resolve());
 })
@@ -83,7 +83,7 @@ XFile* xfileOpen(const char* filePath, const char* mode)
     assert(filePath); // "filename", "xfile.c", 162
     assert(mode); // "mode", "xfile.c", 163
 #ifdef __EMSCRIPTEN__
-    em_checkDiskCache(filePath);
+    em_check_external_cache(filePath);
 #endif
     XFile* stream = (XFile*)malloc(sizeof(*stream));
     if (stream == nullptr) {
