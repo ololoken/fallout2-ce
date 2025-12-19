@@ -1,5 +1,6 @@
 #include "map.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -36,6 +37,7 @@
 #include "random.h"
 #include "scripts.h"
 #include "settings.h"
+#include "sfall_callbacks.h"
 #include "sfall_config.h"
 #include "svga.h"
 #include "text_object.h"
@@ -953,6 +955,10 @@ static int mapLoad(File* stream)
 
         strcat(path, ".GAM");
         globalVarsRead(path, "MAP_GLOBAL_VARS:", &gMapGlobalVarsLength, &gMapGlobalVars);
+        if (gMapHeader.globalVariablesCount != gMapGlobalVarsLength) {
+            assert(gMapHeader.globalVariablesCount == gMapGlobalPointers.size());
+            gMapGlobalPointers.resize(gMapGlobalVarsLength);
+        }
         gMapHeader.globalVariablesCount = gMapGlobalVarsLength;
     }
 
@@ -1002,6 +1008,8 @@ err:
     } else {
         _obj_preload_art_cache(gMapHeader.flags);
     }
+
+    sfallOnBeforeMapLoad();
 
     _partyMemberRecoverLoad();
     interfaceBarShow();

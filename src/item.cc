@@ -634,7 +634,7 @@ int itemDropAll(Object* critter, int tile)
 
     if (hasEquippedItems) {
         Rect updatedRect;
-        int fid = buildFid(OBJ_TYPE_CRITTER, frmId, FID_ANIM_TYPE(critter->fid), 0, (critter->fid & 0x70000000) >> 28);
+        int fid = buildFid(OBJ_TYPE_CRITTER, frmId, FID_ANIM_TYPE(critter->fid), 0, FID_ROTATION(critter->fid));
         objectSetFid(critter, fid, &updatedRect);
         if (FID_ANIM_TYPE(critter->fid) == ANIM_STAND) {
             tileWindowRefreshRect(&updatedRect, gElevation);
@@ -1059,7 +1059,7 @@ int itemGetQuantity(Object* obj, Object* item)
     return quantity;
 }
 
-// Returns true if [a1] posesses an item with 0x2000 flag.
+// Returns true if [obj] posesses an item with 0x2000 flag.
 //
 // 0x4780E4
 int itemIsQueued(Object* obj)

@@ -2664,6 +2664,20 @@ int objectGetDistanceBetweenTiles(Object* object1, int tile1, Object* object2, i
     return distance;
 }
 
+bool objectWithinWalkDistance(Object* critter, Object* target)
+{
+    int walkDistance = 5;
+    configGetInt(&gSfallConfig, SFALL_CONFIG_MISC_KEY, SFALL_CONFIG_USE_WALK_DISTANCE, &walkDistance);
+    if (objectGetDistanceBetween(critter, target) >= walkDistance) {
+        return false;
+    }
+    if (critter == nullptr || target == nullptr) {
+        return false;
+    }
+
+    return _make_path(critter, critter->tile, target->tile, nullptr, 0) < walkDistance;
+}
+
 // 0x48BC38
 int objectListCreate(int tile, int elevation, int objectType, Object*** objectListPtr)
 {
@@ -5147,7 +5161,7 @@ void _obj_fix_violence_settings(int* fid)
         anim = (anim == ANIM_FALL_BACK_BLOOD_SF)
             ? ANIM_FALL_BACK_SF
             : ANIM_FALL_FRONT_SF;
-        *fid = buildFid(OBJ_TYPE_CRITTER, *fid & 0xFFF, anim, (*fid & 0xF000) >> 12, (*fid & 0x70000000) >> 28);
+        *fid = buildFid(OBJ_TYPE_CRITTER, *fid & 0xFFF, anim, (*fid & 0xF000) >> 12, FID_ROTATION(*fid));
     }
 
     if (shouldResetViolenceLevel) {
