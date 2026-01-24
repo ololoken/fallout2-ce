@@ -388,18 +388,19 @@ void _mouse_info()
 
         switch (gesture.type) {
         case kTap:
-            if (gesture.numberOfTouches == 1) {
-#ifdef __EMSCRIPTEN__
-                _mouse_simulate_input(gesture.x, gesture.y, MOUSE_STATE_LEFT_BUTTON_DOWN);
-#else
-                _mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
-#endif
-            } else if (gesture.numberOfTouches == 2) {
-#ifdef __EMSCRIPTEN__
-                _mouse_simulate_input(gesture.x, gesture.y, MOUSE_STATE_RIGHT_BUTTON_DOWN);
-#else
-                _mouse_simulate_input(0, 0, MOUSE_STATE_RIGHT_BUTTON_DOWN);
-#endif
+            if (screenIsFullscreen()) {
+                if (gesture.numberOfTouches == 1) {
+                    _mouse_simulate_input(0, 0, MOUSE_STATE_LEFT_BUTTON_DOWN);
+                } else if (gesture.numberOfTouches == 2) {
+                    _mouse_simulate_input(0, 0, MOUSE_STATE_RIGHT_BUTTON_DOWN);
+                }
+            }
+            else {
+                if (gesture.numberOfTouches == 1) {
+                    _mouse_simulate_input(gesture.x, gesture.y, MOUSE_STATE_LEFT_BUTTON_DOWN);
+                } else if (gesture.numberOfTouches == 2) {
+                    _mouse_simulate_input(gesture.x, gesture.y, MOUSE_STATE_RIGHT_BUTTON_DOWN);
+                }
             }
             break;
         case kLongPress:
@@ -408,10 +409,10 @@ void _mouse_info()
                 prevx = gesture.x;
                 prevy = gesture.y;
             }
-#ifdef __EMSCRIPTEN__ // ignore all this delta magic
-            prevx = 0;
-            prevy = 0;
-#endif
+            if (!screenIsFullscreen()) {
+                prevx = 0;
+                prevy = 0;
+            }
 
             if (gesture.type == kLongPress) {
                 if (gesture.numberOfTouches == 1) {
@@ -560,13 +561,14 @@ void _mouse_simulate_input(int delta_x, int delta_y, int buttons)
         mouseRect.top = gMouseCursorY;
         mouseRect.right = gMouseCursorWidth + gMouseCursorX - 1;
         mouseRect.bottom = gMouseCursorHeight + gMouseCursorY - 1;
-#ifdef __EMSCRIPTEN__
-        gMouseCursorX = delta_x;
-        gMouseCursorY = delta_y;
-#else
-        gMouseCursorX += delta_x;
-        gMouseCursorY += delta_y;
-#endif
+        if (screenIsFullscreen()) {
+            gMouseCursorX += delta_x;
+            gMouseCursorY += delta_y;
+        }
+        else {
+            gMouseCursorX = delta_x;
+            gMouseCursorY = delta_y;
+        }
         _mouse_clip();
 
         windowRefreshAll(&mouseRect);
@@ -670,14 +672,14 @@ void _mouse_get_raw_state(int* out_x, int* out_y, int* out_buttons)
     }
 
     _raw_buttons = 0;
-#ifdef __EMSCRIPTEN__
-    _raw_x = mouseData.x;
-    _raw_y = mouseData.y;
-#else
-    _raw_x += mouseData.x;
-    _raw_y += mouseData.y;
-#endif
-
+    if (screenIsFullscreen()) {
+        _raw_x += mouseData.x;
+        _raw_y += mouseData.y;
+    }
+    else {
+        _raw_x = mouseData.x;
+        _raw_y = mouseData.y;
+    }
 
     if (mouseData.buttons[0] != 0) {
         _raw_buttons |= MOUSE_EVENT_LEFT_BUTTON_DOWN;
